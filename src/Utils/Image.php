@@ -102,6 +102,9 @@ class Image extends Nette\Object
 	/** {@link resize()} fills given area exactly */
 	const EXACT = 0b1000;
 
+	/** {@link resize()} fills given area exactly without croping image, fill rest of area with background */
+	const FILL_EXACT = 0b1100;
+
 	/** image types */
 	const JPEG = IMAGETYPE_JPEG,
 		PNG = IMAGETYPE_PNG,
@@ -292,10 +295,18 @@ class Image extends Nette\Object
 		list($newWidth, $newHeight) = static::calculateSize($this->getWidth(), $this->getHeight(), $width, $height, $flags);
 
 		if ($newWidth !== $this->getWidth() || $newHeight !== $this->getHeight()) { // resize
-			$newImage = static::fromBlank($newWidth, $newHeight, self::RGB(0, 0, 0, 127))->getImageResource();
+			$moveWidth = 0;
+			$moveHeight = 0;
+			if ($flags & self::FILL_EXACT) {
+				$newImage = static::fromBlank($width, $height, self::RGB(0, 0, 0, 127))->getImageResource();
+				$moveWidth = ($width - $newWidth) / 2;
+				$moveHeight = ($height - $newHeight) / 2;
+			} else {
+				$newImage = static::fromBlank($newWidth, $newHeight, self::RGB(0, 0, 0, 127))->getImageResource();
+			}
 			imagecopyresampled(
 				$newImage, $this->image,
-				0, 0, 0, 0,
+				$moveWidth, $moveHeight, 0, 0,
 				$newWidth, $newHeight, $this->getWidth(), $this->getHeight()
 			);
 			$this->image = $newImage;
