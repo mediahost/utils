@@ -294,7 +294,7 @@ class Image extends Nette\Object
 
 		list($newWidth, $newHeight) = static::calculateSize($this->getWidth(), $this->getHeight(), $width, $height, $flags);
 
-		if ($newWidth !== $this->getWidth() || $newHeight !== $this->getHeight()) { // resize
+		if ($newWidth !== $this->getWidth() || $newHeight !== $this->getHeight() || ($flags & self::FILL_EXACT)) { // resize
 			$moveWidth = 0;
 			$moveHeight = 0;
 			if ($flags & self::FILL_EXACT) {
